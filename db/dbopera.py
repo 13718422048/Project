@@ -22,6 +22,21 @@ class CDbopera(object):
 	def __init__(self):
 		pass
 	
+	
+
+	def __conn(self, *args, **kwargs):
+		__type = None
+		
+		if db_type == "mongodb":
+			__type = "mongodb"
+		
+		if db_type == "mysql":
+			__type = "mysql"
+		
+			
+		pass
+		
+	
 	@classmethod
 	def query(self, key, **keys):
 		pass 

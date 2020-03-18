@@ -1,5 +1,9 @@
+
 #!/usr/bin/env python
 #coding:utf-8
+
+
+
 """
   Author:   --<>
   Purpose: 
@@ -7,39 +11,38 @@
 """
 
 '''
-function : kuaidaili站点的爬虫(https://www.kuaidaili.com)
+function : 齐云代理站点的爬虫(https://www.7yip.cn)
 '''
 
-import os
 from bs4 import BeautifulSoup
 from plugin import setting
 import copy
 import requests
-#import requests.packages.urllib3.util.ssl_
 import time
 import traceback
 from main.loghandle import LogHandler as mylogger
-import json
 import random
-import logging
-logging.getLogger("requests").setLevel(logging.WARNING)
-
+import os
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-log = mylogger()
+import logging
+logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+
+threadlog = mylogger()
 
 httpheader = {
-    "User-Agent": "",
-    "Host": "www.kuaidaili.com",
-    "Accept": "text/html, application/xml;q=0.9, application/xhtml+xml, image/png, image/webp, image/jpeg, image/gif, image/x-xbitmap, */*;q=0.1",
-    "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
-    "Accept-Encoding": "zh-CN,zh;q=0.9,en;q=0.8",
-    "Referer": None,
-    "Cookie": None,
-    "Cache-Control": "no-cache",
-    "Connection": "Keep-Alive",
-    "DNT": "1"
+    "Host": "www.7yip.cn",
+"Connection": "keep-alive",
+"Cache-Control": "max-age=0",
+"Upgrade-Insecure-Requests": "1",
+"User-Agent": "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36",
+"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+"Referer": None,
+"Accept-Encoding": "gzip, deflate, br",
+"Accept-Language": "zh-CN,zh;q=0.9",
+"Cookie": None
 }
 
 
@@ -61,14 +64,13 @@ def proxylist(topurl, header):
             yield href["href"]
 """
 
-
 # 内容页
 def singleproxy(proxyurl, header):
     
     for i in range(3):
         try:
             req = requests.get(url = proxyurl, headers = header, timeout = setting.timeout, verify = False)
-
+            
             if req.status_code == 200:
                 if req.text is not None:
                     soup = BeautifulSoup(req.text, "html.parser")
@@ -101,24 +103,21 @@ def singleproxy(proxyurl, header):
                             
                             yield proxy
                         except Exception:
-                            log.warning(traceback.format_exc())
+                            threadlog.error(traceback.format_exc())
+                            continue
                     return
+                
             time.sleep(random.randint(0,5))
-        except requests.exceptions.RequestException:
-            # 连接超时
-            log.warning(traceback.format_exc())
-            continue
         except Exception:
-            log.error(traceback.format_exc())
-
+            threadlog.error(traceback.format_exc())
+            continue    
+    
     return
-
-
+    
 # 启动爬虫
 def run():
-    #print("kuaidaili")
     httpheader["User-Agent"] = setting.getua()
-    preurl = "https://www.kuaidaili.com"
+    preurl = "https://www.7yip.cn"
     
     cookie = setting.getcookie(preurl, httpheader)
     
@@ -127,28 +126,21 @@ def run():
         cookie = setting.getcookie(preurl, httpheader)
         iter += 1
     
-    if cookie is None:
-        return 
-    
     httpheader["Cookie"] = "; ".join(key + "=" + value for (key, value) in cookie.items())
     #httpheader["Cookie"] = httpheader["Cookie"][:-2]
 
-    proxylsurl = ["https://www.kuaidaili.com/free/inha/", "https://www.kuaidaili.com/free/intr/"]
-    #proxylsurl = ["https://www.kuaidaili.com/free/inha/"]
+    proxylsurl = ["https://www.7yip.cn/free/?action=china&page="]
     
     for proxyurl in proxylsurl:
         
         for i in range(0, setting.pagerange):
     
             httpheader["Referer"] = preurl
-            if i == 0:
-                # page=1时的操作
-                topurl = proxyurl
-            else:
-                topurl = proxyurl + str(i) + "/"
+            
+            topurl = proxyurl + str(i + 1)
         
             time.sleep(setting.rate)
-            log.info(os.path.split(__file__)[1] + " processing " + topurl)
+            threadlog.info(os.path.split(__file__)[1] + " processing " + topurl)
             for proxy in singleproxy(topurl, httpheader):
                 yield proxy 
     
@@ -156,10 +148,8 @@ def run():
 
 
 if __name__ == "__main__":
-    proxies = run()
-    for proxy in proxies:
-        print(proxy)
-        print(json.dumps(proxy, ensure_ascii = False))
-        log.LOG(action = "info", msg = json.dumps(proxy, ensure_ascii = False))
     
+    """roxies = run()
+    for proxy in proxies:
+        print(proxy)"""
     

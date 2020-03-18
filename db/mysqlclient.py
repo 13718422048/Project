@@ -14,26 +14,17 @@ class CMysqlClient(object):
 	
 	def __init__(self, *args, **kwargs):
 		# 构造函数
-		self._conn = None
+		user = kwargs.get("user", d=None)
+		password = kwargs.get("password", d=None)
+		ip = kwargs.get("ip", None)
+		database = kwargs.get("ip", None)
+		
 		pass
 	
-	def __conn(self, *args, **kwargs):
-		__type = None
-		
-		if db_type == "mongodb":
-			__type = "mongodb"
-		
-		if db_type == "mysql":
-			__type = "mysql"
-		
-			
+	def connect(self):
+		"""
+		连接数据库
+		"""
 		pass
 	
-	
-	
-	def __def__(self):
-		# 析构函数
-		# 判断mysql是否连接，连接则关闭连接
-		if self._conn:
-			pass
-		
+	def 

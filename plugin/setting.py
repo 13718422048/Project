@@ -8,15 +8,21 @@
 
 import random
 import requests
+#from _datetime import time
+import time
 
 # 爬虫插件列表
-pluginlist = []
+#pluginlist = ["plug_kuaidaili", "plug_qydaili", "plug_xicidaili", "plug_zdaye"]
+pluginlist = ["plug_kuaidaili", "plug_xicidaili", "plug_7yip", "plug_ip3366", "plug_89ip", "plug_nimadaili", "plug_superfastip"]
+#pluginlist = ["plug_kuaidaili", "plug_xicidaili", "plug_7yip", "plug_ip3366", "plug_nimadaili"]
+#pluginlist = ["plug_xicidaili"]
+#pluginlist = ["plug_nimadaili"]
 
 # 爬虫超时时间
-timeout = 10
+timeout = (5, 6)
 
-# 仅获取10页
-pagerange = 10
+# 爬取的页数，默认为5页
+pagerange = 1
 
 # 爬虫频率
 rate = 5 + random.randint(1, 5)
@@ -94,7 +100,7 @@ ualist = ["Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_6; en-us) AppleWebKit/
 tmp_proxy = {
     "ipaddress" : "",
     "port" : "",
-    "serveradd" : "",
+    "svradd" : "",
     "isanony" : "",
     "prototype" : "",
     "speed" : "",
@@ -112,9 +118,16 @@ def getua():
 
 # 获取cookie
 def getcookie(url, httpheader):
-    req = request.get(url, header = httpheader)
-    if req.status_code != 200:
-        cookies = requests.utils.dict_from_cookiejar(req.cookies)
-        return cookies
-    else:
-        return None
+    i = 0
+    while i < 3:
+        req = requests.get(url, headers = httpheader, verify = False, timeout = timeout)
+        i += 1
+        if req.status_code == 200:
+            if req.text is not None:
+                cookies = requests.utils.dict_from_cookiejar(req.cookies)
+                return cookies
+        
+        time.sleep(3)
+        
+    return None
+    
